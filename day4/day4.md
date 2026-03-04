@@ -1,4 +1,4 @@
-# Day 4: Secure Root SSH Access
+# Day 4: Script Execution Permissions
 
 ## Details 
 https://engineer.kodekloud.com/project-details
