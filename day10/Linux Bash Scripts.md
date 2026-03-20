@@ -4,34 +4,27 @@
 https://engineer.kodekloud.com/project-details
 ## Actividad
 
-The production support team of xFusionCorp Industries is working on developing some bash scripts to automate different day to day tasks. One is to create a bash script for taking websites backup. They have a static website running on App Server 1 in Stratos Datacenter, and they need to create a bash script named media_backup.sh which should accomplish the following tasks. (Also remember to place the script under /scripts directory on App Server 1).
+The production support team of xFusionCorp Industries is working on developing some bash scripts to automate different day to day tasks. One is to create a bash script for taking websites backup. They have a static website running on App Server 3 in Stratos Datacenter, and they need to create a bash script named official_backup.sh which should accomplish the following tasks. (Also remember to place the script under /scripts directory on App Server 3).
 
+a. Create a zip archive named xfusioncorp_official.zip of /var/www/html/official directory.
 
-
-a. Create a zip archive named xfusioncorp_media.zip of /var/www/html/media directory.
-
-
-b. Save the archive in /backup/ on App Server 1. This is a temporary storage, as backups from this location will be cleaned on a weekly basis. Therefore, we also need to save this backup archive on Nautilus Storage Server.
-
+b. Save the archive in /backup/ on App Server 3. This is a temporary storage, as backups from this location will be cleaned on a weekly basis. Therefore, we also need to save this backup archive on Nautilus Storage Server.
 
 c. Copy the created archive to Nautilus Storage Server server in /backup/ location.
 
-
 d. Please make sure script won't ask for password while copying the archive file. Additionally, the respective server user (for example, tony in case of App Server 1) must be able to run it.
 
-
 e. Do not use sudo inside the script.
-
 Note:
 The zip package must be installed on given App Server before executing the script. This package is essential for creating the zip archive of the website files. Install it manually outside the script.
 
 
 
-**Paso 1. Conectarse al servidor AppServer1, verificar el sistema operativo e instalar zip**  
+**Paso 1. Conectarse al servidor AppServer3, verificar el sistema operativo e instalar zip**  
 
 
 ```
-ssh tony@stapp01
+ssh banner@stapp03
 
 cat /etc/os-release
 
@@ -62,7 +55,7 @@ Instalar zip
 sudo yum install zip -y
 ```
 
-**Paso 2. En el server stapp01 verificar si ya tiene llaves SSH**  
+**Paso 2. En el server stapp03 verificar si ya tiene llaves SSH**  
 
 ```
 ls ~/.ssh/
@@ -70,7 +63,7 @@ ls ~/.ssh/
 
 Si ves _id_rsa_ y _id_rsa.pub_ ya tienes llaves generadas, salta al Paso 4.
 
-**Paso 3.  Generar el par de llaves SSH en stapp02**
+**Paso 3.  Generar el par de llaves SSH en stapp03**
 
 ```
 ssh-keygen -t rsa
@@ -123,11 +116,11 @@ and check to make sure that only the key(s) you wanted were added.
 _Verifica que funcione sin contraseña:_
 
 ```
-[steve@stapp02 ~]$ ssh natasha@ststor01 "echo ok"
+$ ssh natasha@ststor01 "echo ok"
 ok
 ```
 
-**Paso 4. Crear el script**
+**Paso 5. Crear el script**
 
 ```
 sudo mkdir -p /backup
@@ -146,7 +139,7 @@ Configurar el script
 # a. Crear el zip del sitio web
 zip -r /backup/xfusioncorp_official.zip /var/www/html/official
 
-# b y c. Copiar el backup al Storage Server
+# b. Copiar el backup al Storage Server
 scp /backup/xfusioncorp_official.zip natasha@ststor01:/backup/
 
 ```
@@ -170,13 +163,13 @@ Explicacion
 ```
 scp <origen> <usuario>@<servidor>:<destino>
 ```
-**Paso 5. Verificar y ajustar permisos de ejecución del script**
+**Paso 6. Verificar y ajustar permisos de ejecución del script**
 
 ```
 cd /scripts
 ls -la | grep *.sh
 
--rw-r--r-- 1 root root  216 Mar 20 01:51 official_backup.sh
+-rw-r--r-- 1 root root  212 Mar 20 22:55 official_backup.sh
 ```
 Si hacen falta permisos de ejecución
 
@@ -184,20 +177,20 @@ Si hacen falta permisos de ejecución
 sudo chmod +x /scripts/official_backup.sh
 
 ls -la | grep *.sh
--rwxr-xr-x 1 root root  216 Mar 20 01:51 official_backup.sh
+-rwxr-xr-x 1 root root  212 Mar 20 22:55 official_backup.sh
 ```
 
-**Paso 6. Verifica que desde stapp01 con el user steve pueda ejecutar el script**
+**Paso 7. Verifica que desde stapp03 con el user banner pueda ejecutar el script**
 
 ```
-[tony@stapp01 /]$ bash /scripts/media_backup.sh
+$ bash /scripts/official_backup.sh
   adding: var/www/html/media/ (stored 0%)
   adding: var/www/html/media/index.html (stored 0%)
 xfusioncorp_official.zip                                                  100%  413     2.7MB/s   00:00  
 ```
 Verifica en el server local
 ```
-[tony@stapp01 /]$ ls -lh /backup/xfusioncorp_official.zip
+$ ls -lh /backup/xfusioncorp_official.zip
 
 -rw-r--r-- 1 tony tony 413 Mar 20 02:16 /backup/xfusioncorp_official.zip
 ```
@@ -209,5 +202,5 @@ _Luego comprueba:_
 ```
 ssh natasha@ststor01 "ls -lh /backup/xfusioncorp_official.zip"
 
--rw-r--r-- 1 natasha natasha 413 Mar 20 02:16 /backup/xfusioncorp_official.zip
+-rw-r--r-- 1 natasha natasha 428 Mar 20 22:57 /backup/xfusioncorp_official.zip
 ```
