@@ -1,0 +1,138 @@
+# Day 11: Install and Configure Tomcat Server
+
+## Details 
+https://engineer.kodekloud.com/project-details
+## Actividad
+
+The Nautilus application development team recently finished the beta version of one of their Java-based applications, which they are planning to deploy on one of the app servers in Stratos DC. After an internal team meeting, they have decided to use the tomcat application server. Based on the requirements mentioned below complete the task:
+
+
+a. Install tomcat server on App Server 1.
+
+b. Configure it to run on port 6400.
+
+c. There is a ROOT.war file on Jump host at location /tmp.
+
+
+Deploy it on this tomcat server and make sure the webpage works directly on base URL i.e curl http://stapp01:6400
+
+## Contexto
+
+Tomcat es un servidor de aplicaciones Java. Los archivos `.war` (Web Application Archive) son como "paquetes" de aplicaciones web Java que Tomcat despliega automáticamente cuando los colocas en su directorio `webapps/`.
+
+
+
+**Paso 1. Copiar el ROOT.war al App Server 1**  
+
+Desde el Jump Host, transfiere el archivo al servidor:
+
+```
+scp /tmp/ROOT.war tony@stapp01:/tmp/
+
+```
+
+**Paso 2. Conectarte al App Server 1 y habilitar el usuario a root durante la sesión**  
+
+```
+ssh tony@stapp01
+sudo -i
+```
+
+## Contexto `sudo -i`
+
+¿Qué hace exactamente?
+Te eleva a usuario root iniciando un login shell completo, lo que implica:
+
+* Cambia tu usuario a root
+* Carga las variables de entorno de root (como PATH, HOME)
+* Te sitúa en el home de root: /root
+
+¿Por qué no simplemente sudo <comando>?
+
+  Sería tedioso escribir sudo delante de cada uno. Con `sudo -i` te conviertes en root para toda la sesión.
+
+```
+ [tony@stapp01 ~]$ sudo -i
+
+We trust you have received the usual lecture from the local System
+Administrator. It usually boils down to these three things:
+
+    #1) Respect the privacy of others.
+    #2) Think before you type.
+    #3) With great power comes great responsibility.
+
+[sudo] password for tony: 
+[root@stapp01 ~]#  
+
+```
+
+Al final se ve el cambio en el prompt
+
+**Paso 3.  Instalar Tomcat**
+
+```
+yum install -y tomcat
+
+```
+
+**Paso 4. Cambiar el puerto de 8080 a 6400**
+
+El archivo de configuración principal de Tomcat es `server.xml`:
+
+```
+vi /etc/tomcat/server.xml
+```
+
+Busca esta línea:
+
+```
+<Connector port="8080" protocol="HTTP/1.1"
+```
+Cámbiala a:
+```
+<Connector port="6400" protocol="HTTP/1.1"
+```
+
+
+**Paso 5. Desplegar el ROOT.war**
+
+```
+cp /tmp/ROOT.war /var/lib/tomcat/webapps/ROOT.war
+```
+Tomcat detecta automáticamente el `.war` y lo desempaqueta. Al llamarse `ROOT`, reemplaza la app por defecto en /.
+
+
+
+**Paso 6. Iniciar y habilitar Tomcat**
+
+```
+systemctl start tomcat
+systemctl enable tomcat
+systemctl status tomcat
+```
+
+
+
+**Paso 7. Verificar**
+
+```
+curl http://stapp01:6400
+```
+Debería ver el HTML de la aplicación Java desplegada.
+
+
+**Resumen del flujo:**
+```
+Jump Host ──scp──> stapp01:/tmp/ROOT.war
+                        |
+                   instalar tomcat
+                        |
+                   server.xml → puerto 6400
+                        |
+                   ROOT.war → /var/lib/tomcat/webapps/
+                        |
+                   systemctl start tomcat
+                        |
+                   curl http://stapp01:6400 
+
+ ```
