@@ -12,6 +12,25 @@ We have one of our websites up and running on our Nautilus infrastructure in Str
 
 ## Contexto
 
+## 🔥 Firewall e iptables
+
+### ¿Qué es un Firewall?
+Un firewall es como un **"portero"** que controla qué tráfico de red puede
+entrar o salir de un servidor. Sin firewall, cualquier persona en internet
+puede conectarse a cualquier puerto abierto de tu servidor.
+
+---
+
+### ¿Qué es `iptables`?
+`iptables` es la herramienta de firewall más usada en Linux. Funciona con
+**reglas** que le dicen al sistema qué hacer con cada paquete de red:
+
+| Acción | Comportamiento |
+|---|---|
+| `ACCEPT` | Dejar pasar |
+| `DROP` | Bloquear silenciosamente |
+| `REJECT` | Bloquear y notificar |
+
 ## 📚 Conceptos Clave — iptables
 
 ### Flags principales
@@ -189,13 +208,13 @@ ip addr show → 10.244.13.91
         ↓
 stapp01 / stapp02 / stapp03
         |
-        ├── yum install iptables iptables-services
+        ├── yum install -y iptables iptables-services
         |
         ├── systemctl start iptables
         ├── systemctl enable iptables
         |
-        ├── iptables -I INPUT 1 -p tcp --dport 3002 -s 10.244.13.91 -j ACCEPT
-        ├── iptables -I INPUT 2 -p tcp --dport 3002 -j DROP
+        ├── iptables -I INPUT 1 -p tcp --dport 3000 -s 10.244.49.105 -j ACCEPT
+        ├── iptables -I INPUT 2 -p tcp --dport 3000 -j DROP
         |
         ├── iptables -L INPUT --line-numbers -n  (verificar reglas)
         |
